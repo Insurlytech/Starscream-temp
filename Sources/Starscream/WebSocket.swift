@@ -148,9 +148,10 @@ open class FoundationStream : NSObject, WSStream, StreamDelegate  {
         var writeStream: Unmanaged<CFWriteStream>?
         let h = url.host! as NSString
         CFStreamCreatePairWithSocketToHost(nil, h, UInt32(port), &readStream, &writeStream)
-        inputStream = readStream!.takeRetainedValue()
-        outputStream = writeStream!.takeRetainedValue()
+        inputStream = readStream?.takeRetainedValue()
+        outputStream = writeStream?.takeRetainedValue()
 
+        guard let inStream = inputStream, let outStream = outputStream else { return }
         #if os(watchOS) //watchOS us unfortunately is missing the kCFStream properties to make this work
         #else
             if enableSOCKSProxy {
@@ -162,7 +163,6 @@ open class FoundationStream : NSObject, WSStream, StreamDelegate  {
             }
         #endif
         
-        guard let inStream = inputStream, let outStream = outputStream else { return }
         inStream.delegate = self
         outStream.delegate = self
         if ssl.useSSL {
